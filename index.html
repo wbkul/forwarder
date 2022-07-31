@@ -38,6 +38,9 @@
     <div style="padding-top: 2rem;">
         <span id="data"></span>
     </div>
+    <div>
+        <video controls id="vid" name="media" src="" width="480" height="360" type="video/mp4"></video>
+    </div>
     <div id="sourceSet"></div>
 
 
@@ -71,8 +74,11 @@
 
                     document.getElementById(
                         "data"
-                    ).innerHTML = `<a target="_blank" href="${max.src}">Link to ${max["data-width"]}x${max["data-height"]}</a>
-                    <input class="btn" onclick="download(${max.src},${fileName})" data-name="${fileName}" data-url="${max.src}" type="button" value="Download ${fileName} ${max["data-width"]}x${max["data-height"]}" />`;
+                    ).innerHTML = `<a target="_blank" href="${max.src}">Link to ${max["data-width"]}x${max["data-height"]}</a>`
+
+                    document.getElementById(
+                        "vid"
+                    ).src = max.src;
 
                     var o = "";
                     for (var i in data["sources"]) {
