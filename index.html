@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <script
+        src="http://cdnapi.kaltura.com/p/2375821/sp/237582100/embedIframeJs/uiconf_id/43052182/partner_id/2375821"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="./kaltura.js"></script>
+</head>
+
+<body>
+    <div>
+        <h3>Download Kaltura video</h3>
+    </div>
+    <div style="margin-bottom: 1rem">
+        Long URL: <textarea id="longUrlArea" name="longUrlArea" rows="4" cols="200"></textarea>
+    </div>
+    <div style="display: flex; flex-direction: row;">
+        <div>
+            partnerId:
+            <input id="partnerId" type="text" value="2375821" style="width: 100px; height: 25px" />
+        </div>
+        <div style="margin-left: 1rem;">
+            entryId:
+            <input id="entryId" type="text" value="1_hyytpbcj" style="width: 100px; height: 25px" /><br />
+        </div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <input class="btn" id="getSources" type="button" value="get sources" />
+    </div>
+    <div style="padding-top: 2rem;">
+        <span id="data"></span>
+    </div>
+    <div id="sourceSet"></div>
+
+
+    <script>
+        function loadSources() {
+            $("#sourceSet").html("loading <blink>...</blink>");
+            kWidget.getSources({
+                partnerId: $("#partnerId").val(),
+                entryId: $("#entryId").val(),
+                callback: function (data) {
+                    console.log(data)
+                    const name = data.name;
+                    const fileName = name.replace(/[/\\?%*:|"<>]/g, '_')
+                    console.log(fileName)
+                    let sources = data["sources"];
+
+                    let bitrates = data["sources"].map((o) => {
+                        if (o["data-bitrate"]) return o["data-bitrate"];
+                        return 0;
+                    });
+
+                    const ifBitrate = (o) => {
+                        if (o["data-bitrate"]) return o["data-bitrate"];
+                        return 0;
+                    };
+
+                    const max = sources.reduce((prev, current) =>
+                        ifBitrate(prev) > ifBitrate(current) ? prev : current
+                    );
+                    console.log(max);
+
+                    document.getElementById(
+                        "data"
+                    ).innerHTML = `<a target="_blank" href="${max.src}">Link to ${max["data-width"]}x${max["data-height"]}</a>
+                    <input class="btn" onclick="download(${max.src},${fileName})" data-name="${fileName}" data-url="${max.src}" type="button" value="Download ${fileName} ${max["data-width"]}x${max["data-height"]}" />`;
+
+                    var o = "";
+                    for (var i in data["sources"]) {
+                        var source = data["sources"][i];
+                        o +=
+                            " <br/>" +
+                            ' Source <a href="' +
+                            source["src"] +
+                            '" >' +
+                            source["data-flavorid"] +
+                            "</a>, ";
+                        o += source["data-bitrate"]
+                            ? " bitrate:" +
+                            source["data-bitrate"] +
+                            " size: " +
+                            source["data-width"] +
+                            "x" +
+                            source["data-height"]
+                            : " ( adaptive ) ";
+                        o += "<br />";
+                    }
+                    $("#sourceSet").html("<h3>Source list:</h3>" + o);
+                },
+            });
+        }
+
+        $("#getSources").click(function () {
+            let partnerId = $("#partnerId").val();
+            let entryId = $("#entryId").val();
+
+            loadSources();
+        });
+
+        const download = (url, name) => {
+            console.log(name)
+            console.log(url)
+            var fileExt = filename.split('.').pop();
+            fetch(url)
+                .then(resp => resp.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    // the filename you want
+                    a.download = name + "." + fileExt;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+
+                    document.getElementById(
+                        "data"
+                    ).innerHTML = `Download complete`;
+                })
+                .catch(() => alert('oh no!'));
+        }
+
+        $(document).ready(function () {
+            var input = document.getElementById('longUrlArea');
+            input.focus();
+            input.select();
+        });
+
+        $("#longUrlArea").bind('input propertychange', function () {
+            try {
+                const val = this.value;
+                const valArray = val.split("/");
+                const entryIdIndex = valArray.indexOf("entryid");
+                if (entryIdIndex > 0) $("#entryId").val(valArray[entryIdIndex + 1])
+            } catch (error) {
+                console.log(error)
+            }
+        });
+    </script>
+</body>
+
+</html>
