@@ -39,7 +39,8 @@
         <input class="btn" id="getSources" type="button" value="get sources" />
     </div>
     <div style="padding-top: 2rem;">
-        <span id="data"></span>
+        <div><span id="data"></span></div>
+        <div><code id="curl"></code></div>
     </div>
     <div>
         <video controls id="vid" name="media" src="" width="480" height="360" type="video/mp4"></video>
@@ -81,6 +82,9 @@
                     ).innerHTML = "(right click -> Save link as... ) " + `<a target="_blank" href="${max.src}">Link to ${max["data-width"]}x${max["data-height"]}</a> </br>
                     <!-- <a href="blob:${max.src}" download="${fileName}">Download</a> -->
                     `
+                    document.getElementById(
+                        "curl"
+                    ).innerHTML = "curl -L " + max.src + ` --output `
 
                     const vid = document.getElementById(
                         "vid"
